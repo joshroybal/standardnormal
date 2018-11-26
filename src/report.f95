@@ -8,11 +8,11 @@ subroutine report(x, n, m, pv, ps, sv, ss, lo, hi, mdn, mad, aad, skw)
    real, intent(in) :: m, pv, ps, sv, ss, mdn, mad, aad, lo, hi, skw
    ! local variables and arrays
    integer, parameter :: NS = 31
-   real, dimension(NS) :: slices
+   integer, dimension(NS) :: slices
    integer :: i, j, idx
    real :: v, xmax
    ! processing
-   slices = 0.0
+   slices = 0
    do i = 1, n
       if (x(i) < 0) then
          idx = 15 + int(5 * x(i))

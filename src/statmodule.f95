@@ -1,6 +1,11 @@
 ! Modern Fortran statistical computations module
-
 module stat_module
+   ! overloading interface for quick selection algorithm functions
+   interface quick_select
+      module procedure quick_select_real
+      module procedure quick_select_integer
+   end interface quick_select
+   
 contains
    ! function returns real mean of all array elements
    function mean(x, n) result(s)
@@ -76,7 +81,7 @@ contains
    ! functions returns index of kth element of x
    ! C. A. R. Hoare's algorithm
    ! implementation works on index array only - preserves data set array
-   function quick_select(k, n, x) result(v)
+   function quick_select_real(k, n, x) result(v)
       implicit none
       ! dummy arguments
       integer, intent(in) :: k, n
@@ -117,8 +122,51 @@ contains
          if (k < i) right = j
       end do
       v = x(idx(k))
-   end function quick_select
+   end function quick_select_real
 
+   function quick_select_integer(k, n, x) result(v)
+      implicit none
+      ! dummy arguments
+      integer, intent(in) :: k, n
+      integer, intent(in), dimension(n) :: x
+      ! function return location
+      real :: v
+      ! local variables
+      integer :: i, j, left, right, tmp
+      integer, dimension(n) :: idx
+      real :: pivot
+      ! processing
+      do i = 1, n
+         idx(i) = i
+      end do
+      left = 1
+      right = n
+      do while (left < right)
+         pivot = x(idx(k))
+         i = left
+         j = right
+         do
+            do while (x(idx(i)) < pivot)
+               i = i + 1
+            end do
+            do while (pivot < x(idx(j)))
+               j = j - 1
+            end do
+            if (i <= j) then
+               tmp = idx(i)
+               idx(i) = idx(j)
+               idx(j) = tmp
+               i = i + 1
+               j = j - 1
+            end if
+            if (i > j) exit
+         end do
+         if (j < k) left = i
+         if (k < i) right = j
+      end do
+      v = x(idx(k))
+   end function quick_select_integer
+   
    ! function returns median of x
    function median(x, n) result(mdn)
       implicit none
