@@ -243,22 +243,17 @@ contains
    end function mean_deviation
 
    ! generate a normal distribution on Linux
-   subroutine normal(n, x)
+   subroutine normal(x, n, mean, sd)
       implicit none
       ! dummy arguments
       integer, intent(in) :: n
       real, intent(out), dimension(n) :: x
+      real, intent(in) :: mean, sd
       ! local variables
-      integer :: i, s, clock
-      real :: pi, temp, mean = 0.0, sd = 1.0
-      integer, dimension(:), allocatable :: seed
+      integer :: i
+      real :: pi, temp
       ! processing
-      call random_seed(size = s)
-      allocate(seed(s))
-      call system_clock(count = clock)
-      seed = clock + 37 * (/ (i - 1, i = 1, n) /)
-      call random_seed(put = seed)
-      deallocate(seed)
+      call init_random_seed()
       call random_number(x) ! uniform distribution
       ! now convert to normal distribution
       pi = 4.0 * atan(1.0)
@@ -268,4 +263,18 @@ contains
          x(i) = temp
       end do
    end subroutine normal
+
+   subroutine init_random_seed()
+      implicit none
+      ! local variables and arrays
+      integer :: i, n, clock
+      integer, dimension(:), allocatable :: seed
+      ! processing
+      call random_seed(size = n)
+      allocate(seed(n))
+      call system_clock(count = clock)
+      seed = clock + 37 * (/ (i - 1, i = 1, n) /)
+      call random_seed(put = seed)
+      deallocate(seed)
+   end subroutine init_random_seed
 end module stat_module

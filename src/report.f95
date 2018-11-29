@@ -7,19 +7,22 @@ subroutine report(x, n, m, pv, ps, sv, ss, lo, hi, mdn, mad, aad, skw)
    real, intent(in), dimension(n) :: x
    real, intent(in) :: m, pv, ps, sv, ss, mdn, mad, aad, lo, hi, skw
    ! local variables and arrays
-   integer, parameter :: NS = 31
+   integer, parameter :: NS = 30
    integer, dimension(NS) :: slices
-   integer :: i, j, idx
-   real :: v, xmax
+   integer :: i, j, idx, smax
+   real :: v, xmax, xmin, span, interval_length
    ! processing
+   xmin = m - 3.0 * ss
+   xmax = m + 3.0 * ss
+   span = xmax - xmin
+   interval_length = span / NS
    slices = 0
    do i = 1, n
-      if (x(i) < 0) then
-         idx = 15 + int(5 * x(i))
-      else
-         idx = 16 + int(5 * x(i))
+      v = x(i) - xmin
+      if (v >= 0 .and. v <= span) then
+         idx = int(v / interval_length) + 1
+         slices(idx) = slices(idx) + 1
       end if
-      if (idx >= 1 .and. idx <= NS) slices(idx) = slices(idx) + 1
    end do
    ! output   
    write (*,*) 'n = ', n
@@ -34,12 +37,12 @@ subroutine report(x, n, m, pv, ps, sv, ss, lo, hi, mdn, mad, aad, skw)
    write (*,*) 'median deviation = ', mad
    write (*,*) 'mean deviation = ', aad
    write (*,*) 'mean skewness = ', skw
-   xmax = quick_select(NS, NS, slices)
+   smax = quick_select(NS, NS, slices)
    do i = 1, NS
-     v = slices(i) / xmax
+     v = real(slices(i)) / real(smax)
      idx = NS * v
-     write (*,1000) -3.0+0.2*(i-1), ('=',j=1,idx)
+     write (*,1000) xmin + interval_length * (i - 1), ('=', j = 1, idx)
    end do
    return
-   1000 format (' ',F4.1,1X,72A1)
+   1000 format (F5.1,1X,30A1)
 end subroutine report
